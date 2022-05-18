@@ -1,0 +1,48 @@
+{
+  "name": "my-gulp",
+  "version": "1.0.0",
+  "description": "Каркас для разработки",
+  "main": "gulpfile.js",
+  "type": "module",
+  "scripts": {
+    "build": "gulp build",
+    "start": "gulp dev",
+    "test": "stylelint \"src/scss/**/*.scss\" --config .stylelintrc.json --customSyntax postcss-scss --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Marty2506/my-gulp.git"
+  },
+  "author": "Marty",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Marty2506/my-gulp/issues"
+  },
+  "homepage": "https://github.com/Marty2506/my-gulp#readme",
+  "devDependencies": {
+    "browser-sync": "^2.27.9",
+    "del": "^6.0.0",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^8.0.0",
+    "gulp-babel": "^8.0.0",
+    "gulp-csscomb": "^3.1.0",
+    "gulp-csso": "^4.0.1",
+    "gulp-dart-sass": "^1.0.2",
+    "gulp-libsquoosh": "^1.1.2",
+    "gulp-newer": "^1.4.0",
+    "gulp-notify": "^4.0.0",
+    "gulp-plumber": "^1.2.1",
+    "gulp-rename": "^2.0.0",
+    "gulp-replace": "^1.1.3",
+    "gulp-svgmin": "^4.1.0",
+    "gulp-svgstore": "^9.0.0",
+    "gulp-uglify": "^3.0.2",
+    "postcss-scss": "^4.0.4",
+    "stylelint": "^14.8.2",
+    "stylelint-config-recess-order": "^3.0.0",
+    "stylelint-config-standard": "^25.0.0",
+    "stylelint-scss": "^4.2.0",
+    "webpack": "^5.72.1",
+    "webpack-stream": "^7.0.0"
+  }
+}
