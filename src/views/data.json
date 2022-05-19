@@ -1,0 +1,15 @@
+{
+  "debug": false,
+  "site_name": "SiteName",
+  "active_menu_link": "link--active",
+  "menu": [
+    {
+      "title": "Главная",
+      "href": "index"
+    },
+    {
+      "title": "Контакты",
+      "href": "contacts"
+    }
+  ]
+}

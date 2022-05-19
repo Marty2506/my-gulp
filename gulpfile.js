@@ -15,6 +15,10 @@ import newer from "gulp-newer";
 import squoosh from 'gulp-libsquoosh';
 import svgo from 'gulp-svgmin';
 import svgstore from 'gulp-svgstore';
+import data from 'gulp-data';
+import fs from 'fs';
+import render from 'gulp-nunjucks-render';
+import htmlmin from 'gulp-htmlmin';
 
 /**
  *  Основные директории
@@ -28,30 +32,36 @@ const path = {
   build: {
     js: `${dirs.dest}/js/`,
     css: `${dirs.dest}/css/`,
-    html: `${dirs.dest}/`,
+    //html: `${dirs.dest}/`,
     files: `${dirs.dest}/files/`,
     images: `${dirs.dest}/img/`,
     fonts: `${dirs.dest}/fonts/`,
+    pages: `${dirs.dest}/`,
   },
   src: {
     // js: `${dirs.src}/js/app.js`,
     js: `${dirs.src}/js/**/*.js`,
     scss: `${dirs.src}/scss/style.scss`,
-    html: `${dirs.src}/*.html`,
+    //html: `${dirs.src}/*.html`,
     files: `${dirs.src}/files/**/*.*`,
     images: `${dirs.src}/img/**/*.{jpg,png,jpeg,gif}`,
     svg: `${dirs.src}/img/**/*.svg`,
     sprite: `${dirs.src}/img/sprite/*.svg`,
     fonts: `${dirs.src}/fonts/*.{woff,woff2}`,
+    views: `${dirs.src}/views/`,
+    pages: `${dirs.src}/views/pages/*.j2`,
+    json: `${dirs.src}/views/data.json`
   },
   watch: {
     js: `${dirs.src}/js/**/*.js`,
     scss: `${dirs.src}/scss/**/*.scss`,
-    html: `${dirs.src}/**/*.html`,
+    //html: `${dirs.src}/**/*.html`,
     files: `${dirs.src}/files/**/*.*`,
     images: `${dirs.src}/img/**/*.{jpg,png,jpeg,gif,webp}`,
     sprite: `${dirs.src}/img/sprite/*.svg`,
     svg: `${dirs.src}/img/**/*.svg`,
+    views: `${dirs.src}/views/**/*.j2`,
+    json: `${dirs.src}/views/data.json`
   },
   clean: `${dirs.dest}`,
 }
@@ -70,10 +80,27 @@ export const clean = () => {
 }
 
 // Сборка html файлов
-const html = () => {
-  return gulp.src(path.src.html)
-    .pipe(replace(/@img\//g, 'img/')) // замена @img на img, не работает
-    .pipe(gulp.dest(path.build.html))
+// const html = () => {
+//   return gulp.src(path.src.html)
+//     .pipe(replace(/@img\//g, 'img/'))
+//     .pipe(gulp.dest(path.build.html))
+//     .pipe(browserSync.stream());
+// }
+
+// Сборка страничек в html
+export const views = () => {
+  return gulp.src(path.src.pages)
+    .pipe(data((file) => {
+      return JSON.parse(
+        fs.readFileSync(path.src.json)
+      );
+    }))
+    .pipe(render({
+      path: [`${path.src.views}`]
+    }))
+    .pipe(htmlmin({ collapseWhitespace: true }))
+    .pipe(replace(/@img\//g, 'img/'))
+    .pipe(gulp.dest(path.build.pages))
     .pipe(browserSync.stream());
 }
 
@@ -129,7 +156,7 @@ const scripts = () => {
 
 const server = (done) => {
   browserSync.init({
-    server: path.build.html,
+    server: path.build.pages,
     notify: false,
     port: 3000
   });
@@ -182,7 +209,9 @@ const fonts = () => {
 // Наблюдатель за изменениями в файлах
 function watcher() {
   gulp.watch(path.watch.files, copy);
-  gulp.watch(path.watch.html, html);
+  // gulp.watch(path.watch.html, html);
+  gulp.watch(path.watch.views, views);
+  gulp.watch(path.watch.json, views);
   gulp.watch(path.watch.scss, styles);
   gulp.watch(path.watch.js, scripts);
   gulp.watch(path.watch.images, images);
@@ -190,7 +219,7 @@ function watcher() {
   gulp.watch([path.src.svg, `!${path.src.sprite}`], svg);
 }
 
-const mainTasks = gulp.parallel(copy, fonts, html, styles, scripts, images, sprite, svg);
+const mainTasks = gulp.parallel(copy, fonts, views, styles, scripts, images, sprite, svg);
 
 // Построение сценариев выполнения задач
 export const dev = gulp.series(clean, mainTasks, gulp.parallel(watcher, server));
