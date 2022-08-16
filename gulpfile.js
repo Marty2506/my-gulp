@@ -19,6 +19,7 @@ import data from 'gulp-data';
 import fs from 'fs';
 import render from 'gulp-nunjucks-render';
 import htmlmin from 'gulp-htmlmin';
+import { dir } from "console";
 
 /**
  *  Основные директории
@@ -41,6 +42,7 @@ const path = {
   src: {
     // js: `${dirs.src}/js/app.js`,
     js: `${dirs.src}/js/**/*.js`,
+    jsVendor: `${dirs.src}/js/vendor/*.js`,
     scss: `${dirs.src}/scss/style.scss`,
     //html: `${dirs.src}/*.html`,
     files: `${dirs.src}/files/**/*.*`,
@@ -50,14 +52,15 @@ const path = {
     fonts: `${dirs.src}/fonts/*.{woff,woff2}`,
     views: `${dirs.src}/views/`,
     pages: `${dirs.src}/views/pages/*.j2`,
-    json: `${dirs.src}/views/data.json`
+    json: `${dirs.src}/views/data.json`,
+    favicon: `${dirs.src}/img/*.ico`
   },
   watch: {
     js: `${dirs.src}/js/**/*.js`,
     scss: `${dirs.src}/scss/**/*.scss`,
     //html: `${dirs.src}/**/*.html`,
     files: `${dirs.src}/files/**/*.*`,
-    images: `${dirs.src}/img/**/*.{jpg,png,jpeg,gif,webp}`,
+    images: `${dirs.src}/img/**/*.{jpg,jpeg,png,gif,webp}`,
     sprite: `${dirs.src}/img/sprite/*.svg`,
     svg: `${dirs.src}/img/**/*.svg`,
     views: `${dirs.src}/views/**/*.j2`,
@@ -72,6 +75,12 @@ const path = {
 const copy = () => {
   return gulp.src(path.src.files)
   .pipe(gulp.dest((path.build.files)));
+}
+
+// Копирование фавиконки
+export const copyFavicon = () => {
+  return gulp.src(path.src.favicon)
+  .pipe(gulp.dest(dirs.dest));
 }
 
 // Очистка папки со сборкой
@@ -117,20 +126,20 @@ export const scssSort = () => {
 const styles = () => {
   return gulp.src(path.src.scss, { sourcemaps: true })
     .pipe(plumber())
-    .pipe(replace(/@img\//g, '../img/'))
     .pipe(sass().on('error', sass.logError))
     .pipe(autoprefixer())
     .pipe(csso())
     .pipe(rename({
       extname: ".min.css"
     }))
+    .pipe(replace(/@img\//g, '../img/'))
     .pipe(gulp.dest(path.build.css))
     .pipe(browserSync.stream());
 }
 
 // Сборка скриптов
 const scripts = () => {
-  return gulp.src(path.src.js, { sourcemaps: true })
+  return gulp.src([path.src.js, `!${path.src.jsVendor}`], { sourcemaps: true })
     .pipe(plumber(
       notify.onError({
         title: "JS",
@@ -150,6 +159,8 @@ const scripts = () => {
     .pipe(rename({
       suffix: '.min'
     }))
+    .pipe(gulp.dest(path.build.js))
+    .pipe(gulp.src(path.src.jsVendor, { sourcemaps: true }))
     .pipe(gulp.dest(path.build.js))
     .pipe(browserSync.stream());
 }
@@ -172,13 +183,25 @@ const images = () => {
       })
     ))
     .pipe(newer(path.build.images))
-    .pipe(squoosh({
-      webp: {}
-    }))
-    .pipe(gulp.dest(path.build.images))
-    .pipe(gulp.src(path.src.images))
-    .pipe(newer(path.build.images))
     .pipe(squoosh())
+    .pipe(gulp.dest(path.build.images))
+    .pipe(browserSync.stream());
+}
+
+const imagesWebp = () => {
+  return gulp.src(path.src.images)
+    .pipe(plumber(
+      notify.onError({
+        title: "IMAGES-WEBP",
+        message: "Error: <%= error.message %>"
+      })
+    ))
+    .pipe(newer(path.build.images))
+    .pipe(squoosh({
+      webp: {
+        quality: 90
+      }
+    }))
     .pipe(gulp.dest(path.build.images))
     .pipe(browserSync.stream());
 }
@@ -215,11 +238,12 @@ function watcher() {
   gulp.watch(path.watch.scss, styles);
   gulp.watch(path.watch.js, scripts);
   gulp.watch(path.watch.images, images);
+  gulp.watch(path.watch.images, imagesWebp);
   gulp.watch(path.watch.sprite, sprite);
   gulp.watch([path.src.svg, `!${path.src.sprite}`], svg);
 }
 
-const mainTasks = gulp.parallel(copy, fonts, views, styles, scripts, images, sprite, svg);
+const mainTasks = gulp.parallel(copy, copyFavicon, fonts, views, styles, scripts, images, imagesWebp, sprite, svg);
 
 // Построение сценариев выполнения задач
 export const dev = gulp.series(clean, mainTasks, gulp.parallel(watcher, server));
