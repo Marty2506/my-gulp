@@ -1,0 +1,28 @@
+.page {
+  height: 100%;
+}
+
+.page__body {
+  display: flex;
+  flex-direction: column;
+  min-width: $min-mobile-width;
+  height: 100%;
+  margin: 0 auto;
+
+  font-family: "Proxima Nova", "Arial", sans-serif;
+}
+
+.menu-opened {
+  @media (max-width: $max-tablet-width) {
+    & .page-main {
+      display: none;
+    }
+    & .page-footer {
+      display: none;
+    }
+  }
+}
+
+.modal-opened {
+  overflow: hidden;
+}

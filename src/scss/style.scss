@@ -1,7 +1,6 @@
-body {
-  background-color: beige;
-}
+@import "./global.scss";
+@import "./variables.scss";
+@import "./mixin.scss";
+@import "./fonts.scss";
 
-h1 {
-  color: black;
-}
+@import "./blocks/page.scss";
