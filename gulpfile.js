@@ -173,6 +173,19 @@ const server = (done) => {
   });
 }
 
+const imagesCopy = () => {
+  return gulp.src(path.src.images)
+    .pipe(plumber(
+      notify.onError({
+        title: "IMAGES",
+        message: "Error: <%= error.message %>"
+      })
+    ))
+    .pipe(newer(path.build.images))
+    .pipe(gulp.dest(path.build.images))
+    .pipe(browserSync.stream());
+}
+
 // Оптимизация и копирование картинок в папку сборки
 const images = () => {
   return gulp.src(path.src.images)
@@ -237,16 +250,18 @@ function watcher() {
   gulp.watch(path.watch.json, views);
   gulp.watch(path.watch.scss, styles);
   gulp.watch(path.watch.js, scripts);
-  gulp.watch(path.watch.images, images);
-  gulp.watch(path.watch.images, imagesWebp);
+  gulp.watch(path.watch.images, imagesCopy);
+  // gulp.watch(path.watch.images, images);
+  // gulp.watch(path.watch.images, imagesWebp);
   gulp.watch(path.watch.sprite, sprite);
   gulp.watch([path.src.svg, `!${path.src.sprite}`], svg);
 }
 
 const mainTasks = gulp.parallel(copy, copyFavicon, fonts, views, styles, scripts, images, imagesWebp, sprite, svg);
+const devTasks = gulp.parallel(copy, copyFavicon, fonts, views, styles, scripts, imagesCopy, sprite, svg);
 
 // Построение сценариев выполнения задач
-export const dev = gulp.series(clean, mainTasks, gulp.parallel(watcher, server));
+export const dev = gulp.series(clean, devTasks, gulp.parallel(watcher, server));
 export const build = gulp.series(clean, mainTasks);
 
 // Задача по умолчанию
