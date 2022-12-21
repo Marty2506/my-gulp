@@ -1,5 +1,5 @@
 import gulp from "gulp";
-import del from "del";
+import {deleteAsync} from 'del';
 import replace from "gulp-replace";
 import rename from 'gulp-rename';
 import plumber from "gulp-plumber";
@@ -86,7 +86,7 @@ export const copyFavicon = () => {
 
 // Очистка папки со сборкой
 export const clean = () => {
-  return del(path.clean);
+  return deleteAsync(path.clean);
 }
 
 // Сборка html файлов
