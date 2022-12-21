@@ -8,8 +8,10 @@
   min-width: $min-mobile-width;
   height: 100%;
   margin: 0 auto;
-
-  font-family: "Proxima Nova", "Arial", sans-serif;
+  font-size: 16px;
+  line-height: 19px;
+  font-family: $main-font;
+  color: $black-color;
 }
 
 .menu-opened {
@@ -17,6 +19,7 @@
     & .page-main {
       display: none;
     }
+
     & .page-footer {
       display: none;
     }

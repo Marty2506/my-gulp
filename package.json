@@ -7,7 +7,7 @@
   "scripts": {
     "build": "gulp build",
     "start": "gulp dev",
-    "test": "stylelint \"src/scss/**/*.scss\" --config .stylelintrc.json --customSyntax postcss-scss --fix"
+    "lintscss": "stylelint \"src/scss/**/**.scss\" --config .stylelintrc.json --customSyntax postcss-scss --fix"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,8 @@
   },
   "homepage": "https://github.com/Marty2506/my-gulp#readme",
   "devDependencies": {
+    "@babel/core": "^7.19.1",
+    "@babel/preset-env": "^7.19.1",
     "browser-sync": "^2.27.9",
     "del": "^6.0.0",
     "fs": "^0.0.1-security",
@@ -38,13 +40,16 @@
     "gulp-plumber": "^1.2.1",
     "gulp-rename": "^2.0.0",
     "gulp-replace": "^1.1.3",
+    "gulp-sourcemaps": "^3.0.0",
     "gulp-svgmin": "^4.1.0",
     "gulp-svgstore": "^9.0.0",
     "gulp-uglify": "^3.0.2",
+    "postcss-bem-linter": "^3.3.0",
     "postcss-scss": "^4.0.4",
     "stylelint": "^14.8.2",
     "stylelint-config-recess-order": "^3.0.0",
     "stylelint-config-standard": "^25.0.0",
+    "stylelint-config-standard-scss": "^5.0.0",
     "stylelint-scss": "^4.2.0",
     "webpack": "^5.72.1",
     "webpack-stream": "^7.0.0"

@@ -20,6 +20,7 @@ import fs from 'fs';
 import render from 'gulp-nunjucks-render';
 import htmlmin from 'gulp-htmlmin';
 import { dir } from "console";
+import sourcemaps from "gulp-sourcemaps";
 
 /**
  *  Основные директории
@@ -124,7 +125,7 @@ export const scssSort = () => {
 
 // Сборка стилей
 const styles = () => {
-  return gulp.src(path.src.scss, { sourcemaps: true })
+  return gulp.src(path.src.scss, {sourcemaps: true})
     .pipe(plumber())
     .pipe(sass().on('error', sass.logError))
     .pipe(autoprefixer())
@@ -133,34 +134,30 @@ const styles = () => {
       extname: ".min.css"
     }))
     .pipe(replace(/@img\//g, '../img/'))
-    .pipe(gulp.dest(path.build.css))
+    .pipe(gulp.dest(path.build.css, {sourcemaps: true}))
     .pipe(browserSync.stream());
 }
 
 // Сборка скриптов
 const scripts = () => {
-  return gulp.src([path.src.js, `!${path.src.jsVendor}`], { sourcemaps: true })
+  return gulp.src([path.src.js, `!${path.src.jsVendor}`])
     .pipe(plumber(
       notify.onError({
         title: "JS",
         message: "Error: <%= error.message %>"
       })
     ))
-    // .pipe(rename({
-    //   suffix: '.min'
-    // }))
-    // .pipe(webpack({
-    //   mode: 'development',
-    //   output: {
-    //     filename: 'app.min.js'
-    //   }
-    // }))
-    .pipe(uglify())
-    .pipe(rename({
-      suffix: '.min'
-    }))
+    .pipe(sourcemaps.init())
+      .pipe(babel({
+        presets: ['@babel/preset-env']
+      }))
+      .pipe(uglify())
+      .pipe(rename({
+        suffix: '.min'
+      }))
+    .pipe(sourcemaps.write('../maps/js'))
     .pipe(gulp.dest(path.build.js))
-    .pipe(gulp.src(path.src.jsVendor, { sourcemaps: true }))
+    .pipe(gulp.src(path.src.jsVendor))
     .pipe(gulp.dest(path.build.js))
     .pipe(browserSync.stream());
 }
@@ -252,13 +249,13 @@ function watcher() {
   gulp.watch(path.watch.js, scripts);
   gulp.watch(path.watch.images, imagesCopy);
   // gulp.watch(path.watch.images, images);
-  // gulp.watch(path.watch.images, imagesWebp);
+  gulp.watch(path.watch.images, imagesWebp);
   gulp.watch(path.watch.sprite, sprite);
   gulp.watch([path.src.svg, `!${path.src.sprite}`], svg);
 }
 
 const mainTasks = gulp.parallel(copy, copyFavicon, fonts, views, styles, scripts, images, imagesWebp, sprite, svg);
-const devTasks = gulp.parallel(copy, copyFavicon, fonts, views, styles, scripts, imagesCopy, sprite, svg);
+const devTasks = gulp.parallel(copy, copyFavicon, fonts, views, styles, scripts, imagesCopy, imagesWebp, sprite, svg);
 
 // Построение сценариев выполнения задач
 export const dev = gulp.series(clean, devTasks, gulp.parallel(watcher, server));
